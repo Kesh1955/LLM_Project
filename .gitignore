@@ -7,3 +7,7 @@ __pycache__/
 
 
 .env
+
+# remove folders as too large
+program_data/
+answer_data/
