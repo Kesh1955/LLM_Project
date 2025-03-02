@@ -11,26 +11,24 @@ This project explores:
 
 ## **📂 Folder Structure**
 
-project/
-│── data/                     # Original dataset (JSON from ConvFinQA repo)
-│   │── filtered_data/        # Processed dataset (filtered JSON)
-│   │── answer_data/          # CSV outputs from different answer-based prompt techniques
-│   │── program_data/         # CSV outputs from different program-based prompt techniques
-│
-│── Evaluate_metrics/         # Summarizing results
-│   │── Answer.ipynb          # Analysis & findings for answer-based prompts
-│   │── Program.ipynb         # Analysis & findings for program-based prompts
-│
-│── 01_Answer_Eval.ipynb      # Main notebook for loading & testing answers
-│── 02_Program_Eval.ipynb     # Main notebook for loading & testing programs
-│
-│── src/                      # Source code & system prompts
-│   │── answer_prompt/        # Prompts used for extracting answers
-│   │── program_prompt/       # Prompts used for generating programs
-│   │── LLM_as_judge/         # Prompts for evaluating program equivalence with LLMs
-│
-│── README.md                 # This file
-│── .gitignore                # Files & folders to ignore in Git
+
+- **project/**
+  - `data/` - Original dataset (JSON from ConvFinQA repo)
+    - `filtered_data/` - Processed dataset (filtered JSON)
+    - `answer_data/` - CSV outputs from different answer-based prompt techniques
+    - `program_data/` - CSV outputs from different program-based prompt techniques
+  - `Evaluate_metrics/` - Summarizing results
+    - `Answer.ipynb` - Analysis & findings for answer-based prompts
+    - `Program.ipynb` - Analysis & findings for program-based prompts
+  - `project/`
+    - `01_Answer_Eval.ipynb` - Main notebook for loading & testing answers
+    - `02_Program_Eval.ipynb` - Main notebook for loading & testing programs
+  - `src/` - Source code & system prompts
+    - `answer_prompt/` - Prompts used for extracting answers
+    - `program_prompt/` - Prompts used for generating programs
+    - `LLM_as_judge/` - Prompts for evaluating program equivalence with LLMs
+  - `README.md` - This file
+  - `.gitignore` - Files & folders to ignore in Git
 
 
  ## **📊 Dataset**
@@ -62,7 +60,8 @@ Install poetry (if not already installed)
 curl -sSL https://install.python-poetry.org | python3 -
 
 Install dependencies
-poetry install # This will install all dependencies listed in pyproject.toml and ensure a consistent environment using the poetry.lock file.
+poetry install # This will install all dependencies listed in pyproject.toml 
+               # and ensure a consistent environment using the poetry.lock file.
 
 Activate Virtual Env manage by Poetry
 poetry shell
