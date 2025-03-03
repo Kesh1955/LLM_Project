@@ -15,7 +15,6 @@ V1_EXPLANATION_PROGRAM_PROMPT = {
 }
 
 
-# NEED TO ADAP!!!
 PROGRAM_ERROR_CATEGORIZATION_PROMPT = {
     "system_prompt": (
         """

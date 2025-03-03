@@ -1,11 +1,8 @@
 import pandas as pd
-from difflib import SequenceMatcher
-
 
 # Row level for match or not
 def str_row_exact_match(gold, pred) -> int:
     return 1 if str(gold) == str(pred) else 0
-
 
 
 def float_row_exact_match(gold: float, pred: str) -> bool:
@@ -22,8 +19,6 @@ def float_row_exact_match(gold: float, pred: str) -> bool:
     
     # Return True only if they match exactly
     return pred_float == gold
-
-
 
 
 ### Used for answer 
@@ -44,18 +39,7 @@ def exact_match_score(df_data: pd.DataFrame, column_name: str) -> None:
     return (f"Accuracy Score: {correct_matches}/{total_rows} ({em_score:.2f}%)")
 
 
-
-
-def string_similarity(gold, pred):
-    """
-    Uses difflib to return a ratio in [0..1].
-    1 = perfect match, 0 = no match.
-    """
-    if not gold or not pred:
-        return 0.0
-    return SequenceMatcher(None, gold.strip().lower(), pred.strip().lower()).ratio()
-
-
+# Build in fault tolerance 
 def is_within_tolerance(gold: float, predicted: str, tolerance: float = 1e-2) -> bool:
     """
     Checks if the predicted value is within the allowed error range of the gold value.

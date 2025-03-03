@@ -15,6 +15,20 @@ V1_EXPLANATION_ANSWER_PROMPT = {
     )
 }
 
+EVAL_ANSWER_PROMPT = {
+    "system_prompt": (
+        "You are a Text Similarity Evaluator.\n\n"
+        "You will be given two answers (Answer A and Answer B). "
+        "Your task is to return a single numeric score in the range [0.0, 1.0], "
+        "indicating their semantic similarity:\n\n"
+        "- 0.0 means \"completely different\"\n"
+        "- 1.0 means \"virtually identical\"\n\n"
+        "No additional explanation or text. Just the float.\n\n"
+        "GOLD: {gold}\n"
+        "PRED: {pred}\n\n"
+        "Return only the numeric similarity score in [0,1], nothing else."
+    )
+}
 
 CATEGORISE_ANSWER_PROMPT = {
     "system_prompt": (

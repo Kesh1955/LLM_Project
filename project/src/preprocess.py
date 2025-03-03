@@ -6,7 +6,7 @@ import openai
 
 
 # Convert the table data into html
-def to_html(table_data) -> str:
+def to_html(table_data: pd.DataFrame) -> str:
     """
     Converts a list-of-lists into an HTML table.
     The first row is treated as column headers (<th>).
@@ -49,7 +49,7 @@ def to_html(table_data) -> str:
 
 # Allows to inspect data based on index to understand details of output
 # For example some examples might be missing answers etc...
-def inspect_item(df, index) -> str:
+def inspect_item(df: pd.DataFrame, index) -> str:
     """
     Display all key-value pairs for a specific item in a readable format.
     Uses JSON formatting for clean, indented output of nested structures.
@@ -133,7 +133,7 @@ def robust_extract_float(s: str):
 # Normalise answer
 import re
 
-def normalize_answer(s: str):
+def normalize_answer(s: str) -> float:
     s = s.strip()
     s_no_commas = s.replace(",", "")
     pattern = r"-?\s*[£$\€]?\s*\d+(?:\.\d+)?\s*[KkMmBb]?\s*%?"
@@ -205,7 +205,7 @@ def process_records(records, system_prompts, model_name,prompt_style, table_key,
             "html_table": r.get("html_table", ""),
             "model": model_name,
             "prompt_style": prompt_style,
-            "prompt": system_prompts,  # or system_prompts["system_prompt"] if large
+            "prompt": system_prompts, 
         }
         # Dynamically store the LLM’s answer in whichever column name was specified
         row_dict[model_pred_col_name] = llm_answer
@@ -213,6 +213,7 @@ def process_records(records, system_prompts, model_name,prompt_style, table_key,
         results.append(row_dict)
 
     return pd.DataFrame(results)
+
 
 
 
@@ -265,6 +266,10 @@ def add_local_metric_column(
 
     return df
 
+########
+
+
+
 
 
 from src.llm import openai_llm
@@ -316,3 +321,106 @@ def add_llm_explanation_column(
     return df
 
 
+
+
+#####
+
+# Structured outputs need slightly different requirements, therefore I've not adapted existing functions
+# This would be future work
+def process_records_struc_outputs(records, system_prompts, model_name,prompt_style, table_key, model_pred_col_name, StructuredResponse):
+    """
+    For each record, calls OpenAI and returns a DataFrame with columns:
+      [id, question, gold_answer, program, table, html_table,
+       <answer_col_name>, model, prompt_style, prompt]
+
+    'model_pred_col_name' is the column under which the model's answer is stored.
+    By default, it's 'model_answer', but you can override it (e.g. 'program_prediction').
+    """
+    results = []
+    for r in records:
+        # Build messages (unchanged)
+        messages = construct_main_messages(r, system_prompts, table_key=table_key)
+        try:
+            response = openai.beta.chat.completions.parse(
+                model=model_name,
+                messages=messages,
+                response_format=StructuredResponse
+            )
+            llm_answer = response.choices[0].message.parsed
+        except Exception as e:
+            llm_answer = f"Error: {e}"
+
+        # Build the results row
+        row_dict = {
+            "id": r["id"],
+            "pre_text": r["pre_text"],
+            "post_text": r["post_text"],
+            "gold_answer": r.get("gold_answer", ""),
+            "program": r.get("program", ""),
+            "html_table": r.get("html_table", ""),
+            "question": r["question"],
+            "model": model_name,
+            "prompt_style": prompt_style,
+            "prompt": system_prompts,  # or system_prompts["system_prompt"] if large
+        }
+        # Dynamically store the LLM’s answer in whichever column name was specified
+        row_dict[model_pred_col_name] = llm_answer
+        # print('here')
+        # print(llm_answer.ans_pred)
+
+        row_dict["model_answer"] = llm_answer.ans_pred
+        row_dict[ "model_program_prediction"] = llm_answer.program_pred
+        row_dict["model_reasoning"] = llm_answer.reasoning
+
+        results.append(row_dict)
+
+    return pd.DataFrame(results)
+
+
+
+
+from src.llm import openai_llm_struc_resp
+
+def add_llm_explanation_column_new(
+    df: pd.DataFrame,
+    system_prompt_template: str,
+    gold_col: str = "gold_answer",
+    pred_col: str = "model_answer",
+    new_col_name: str = "explanation_col",
+    model_name: str = "gpt-3.5-turbo"
+) -> pd.DataFrame:
+    """
+    For each row in df, calls the LLM with gold_val, pred_val, and the system_prompt_template.
+    Stores the resulting explanation in the 'new_col_name' column.
+
+    Args:
+        df: DataFrame containing at least 'gold_col' and 'pred_col'.
+        system_prompt_template: A string that may contain '{gold}' and '{pred}' placeholders.
+        gold_col: Column name for the gold (true) answer.
+        pred_col: Column name for the predicted answer.
+        new_col_name: Where we store the final LLM's explanation or evaluation.
+        model_name: OpenAI model to use.
+
+    Returns:
+        A new DataFrame with an additional column ('new_col_name') containing the LLM responses.
+    """
+    df = df.copy()
+    df[new_col_name] = None
+
+    for i, row in df.iterrows():
+        gold_val = row.get(gold_col, "")
+        pred_val = row.get(pred_col, "")
+
+        # Insert the row's gold/pred into the system prompt
+        system_prompt = system_prompt_template['system_prompt'].format(gold=gold_val, pred=pred_val)
+
+        # Build the messages for the ChatCompletion
+        messages = [
+            {"role": "system", "content": system_prompt}
+        ]
+
+        # Call the LLM
+        explanation = openai_llm(messages, model_name)
+        df.at[i, new_col_name] = explanation
+
+    return df

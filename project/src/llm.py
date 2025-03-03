@@ -12,3 +12,19 @@ def openai_llm(messages, model_name):
     except Exception as e:
         return f"Error: {e}"
     
+
+def openai_llm_struc_resp(messages, model_name, StructuredResponse):
+    """
+    Structured output wrapper to call OpenAI ChatCompletion.
+    """
+
+    try: 
+        completion = openai.beta.chat.completions.parse(
+        model=model_name,
+        messages=messages, 
+        response_format=StructuredResponse,
+        )
+
+        return completion.choices[0].message.parsed
+    except Exception as e:
+            return f"Error: {e}"
